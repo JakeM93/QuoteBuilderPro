@@ -10,118 +10,12 @@ import {
   Alert,
 } from 'react-native';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface CatalogueItem {
-  id: string;
-  name: string;
-  labour: number;
-  materials: number;
-}
-
-type Catalogue = Record<string, CatalogueItem[]>;
-
-interface PricingProfile {
-  id: string;
-  name: string;
-  vatRate: number;
-  marginPct: number;
-  complexityMultipliers: Record<string, number>;
-  specMultipliers: Record<string, number>;
-  catalogue: Catalogue;
-}
-
-interface Client {
-  id: string;
-  clientName: string;
-  companyName: string;
-  billingAddress: string;
-  siteAddress: string;
-  contactName: string;
-  contactPhone: string;
-  contactEmail: string;
-  pricingProfileId: string;
-  notes: string;
-}
-
-interface QuoteItem {
-  id: string;
-  included: boolean;
-  category: string;
-  name: string;
-  quantity: number;
-  labour: number;
-  materials: number;
-  complexity: string;
-  spec: string;
-  notes: string;
-}
-
-interface Room {
-  id: string;
-  name: string;
-  included: boolean;
-  description: string;
-  items: QuoteItem[];
-}
-
-interface ActivityEntry {
-  id: string;
-  action: string;
-  date: string;
-  note: string;
-}
-
-type QuoteStatus = 'Draft' | 'Sent' | 'Accepted' | 'Rejected' | 'On Hold';
-
-interface Quote {
-  id: string;
-  quoteNumber: string;
-  clientId: string;
-  status: QuoteStatus;
-  title: string;
-  createdAt: string;
-  description: string;
-  exclusions: string;
-  revision?: string;
-  activity: ActivityEntry[];
-  rooms: Room[];
-}
-
-interface Company {
-  companyName: string;
-  address: string;
-  phone: string;
-  email: string;
-  website: string;
-  quotePrefix: string;
-  nextQuoteNumber: number;
-  defaultTerms: string;
-  defaultExclusions: string;
-}
-
-interface QuoteTotals {
-  labourCost: number;
-  materialCost: number;
-  estimatedCost: number;
-  customerSubtotal: number;
-  subtotal: number;
-  vat: number;
-  total: number;
-  profit: number;
-  profitPct: number;
-}
-
 // ─── Utils ────────────────────────────────────────────────────────────────────
 
-const uid = (): string => Math.random().toString(36).slice(2, 10);
-const money = (v: number): string => `£${Number(v || 0).toFixed(2)}`;
+const uid = () => Math.random().toString(36).slice(2, 10);
+const money = (v) => `£${Number(v || 0).toFixed(2)}`;
 
-const calcTotalsForQuote = (
-  quote: Quote,
-  clients: Client[],
-  pricingProfiles: PricingProfile[]
-): QuoteTotals => {
+const calcTotalsForQuote = (quote, clients, pricingProfiles) => {
   const client = clients.find((c) => c.id === quote.clientId);
   const profile =
     pricingProfiles.find((p) => p.id === client?.pricingProfileId) ||
@@ -179,7 +73,7 @@ const calcTotalsForQuote = (
 
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 
-const DEFAULT_ITEMS: Catalogue = {
+const DEFAULT_ITEMS = {
   Power: [
     { id: uid(), name: 'Double Socket', labour: 25, materials: 18 },
     { id: uid(), name: 'Cooker Connection', labour: 45, materials: 30 },
@@ -202,7 +96,7 @@ const DEFAULT_CLIENT_ID = uid();
 const DEFAULT_QUOTE_ID = uid();
 const DEFAULT_ROOM_ID = uid();
 
-const defaultPricingProfiles: PricingProfile[] = [
+const defaultPricingProfiles = [
   {
     id: DEFAULT_PROFILE_ID,
     name: 'Standard Domestic',
@@ -214,7 +108,7 @@ const defaultPricingProfiles: PricingProfile[] = [
   },
 ];
 
-const defaultClients: Client[] = [
+const defaultClients = [
   {
     id: DEFAULT_CLIENT_ID,
     clientName: 'Demo Client',
@@ -229,7 +123,7 @@ const defaultClients: Client[] = [
   },
 ];
 
-const defaultQuotes: Quote[] = [
+const defaultQuotes = [
   {
     id: DEFAULT_QUOTE_ID,
     quoteNumber: 'EQ-1001',
@@ -255,7 +149,7 @@ const defaultQuotes: Quote[] = [
   },
 ];
 
-const companyDefaults: Company = {
+const companyDefaults = {
   companyName: 'Soar Electrical',
   address: 'Unit 1, Long Eaton',
   phone: '0115 000 0000',
@@ -267,9 +161,11 @@ const companyDefaults: Company = {
   defaultExclusions: 'Decoration, making good, asbestos removal, and structural works excluded unless stated.',
 };
 
+const TABS = ['Home', 'Quotes', 'Clients', 'Pricing', 'Reports', 'Settings'];
+
 // ─── UI Components ────────────────────────────────────────────────────────────
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, children }) {
   return (
     <View style={s.card}>
       <Text style={s.cardTitle}>{title}</Text>
@@ -278,7 +174,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function StatCard({ title, value }: { title: string; value: number }) {
+function StatCard({ title, value }) {
   return (
     <View style={s.statCard}>
       <Text style={s.statValue}>{value}</Text>
@@ -287,11 +183,11 @@ function StatCard({ title, value }: { title: string; value: number }) {
   );
 }
 
-function Label({ text }: { text: string }) {
+function Label({ text }) {
   return <Text style={s.label}>{text}</Text>;
 }
 
-function Input(props: React.ComponentProps<typeof TextInput>) {
+function Input(props) {
   return (
     <TextInput
       placeholderTextColor="#6b7280"
@@ -301,7 +197,7 @@ function Input(props: React.ComponentProps<typeof TextInput>) {
   );
 }
 
-function Button({ text, onPress }: { text: string; onPress: () => void }) {
+function Button({ text, onPress }) {
   return (
     <TouchableOpacity style={s.button} onPress={onPress}>
       <Text style={s.buttonText}>{text}</Text>
@@ -309,7 +205,7 @@ function Button({ text, onPress }: { text: string; onPress: () => void }) {
   );
 }
 
-function ChipRow({ options, selected, onSelect }: { options: { key: string; label: string }[]; selected: string | null; onSelect: (k: string) => void }) {
+function ChipRow({ options, selected, onSelect }) {
   return (
     <View style={s.chipRow}>
       {options.map((o) => {
@@ -324,7 +220,7 @@ function ChipRow({ options, selected, onSelect }: { options: { key: string; labe
   );
 }
 
-function InfoRow({ label, value, strong, compact }: { label: string; value: string; strong?: boolean; compact?: boolean }) {
+function InfoRow({ label, value, strong, compact }) {
   return (
     <View style={[s.infoRow, compact && { marginBottom: 6 }]}>
       <Text style={[s.infoLabel, strong && s.strongText]}>{label}</Text>
@@ -335,7 +231,7 @@ function InfoRow({ label, value, strong, compact }: { label: string; value: stri
 
 // ─── Preview Components ───────────────────────────────────────────────────────
 
-function DocumentPreview({ company, quote, client, totals }: { company: Company; quote: Quote; client: Client | undefined; totals: QuoteTotals }) {
+function DocumentPreview({ company, quote, client, totals }) {
   return (
     <View style={s.docPage}>
       <Text style={s.docCompany}>{company.companyName}</Text>
@@ -374,7 +270,7 @@ function DocumentPreview({ company, quote, client, totals }: { company: Company;
   );
 }
 
-function BreakdownPreview({ quote, totals, profile }: { quote: Quote; totals: QuoteTotals; profile: PricingProfile }) {
+function BreakdownPreview({ quote, totals, profile }) {
   return (
     <View>
       {quote.rooms.filter((r) => r.included).map((room) => (
@@ -399,7 +295,7 @@ function BreakdownPreview({ quote, totals, profile }: { quote: Quote; totals: Qu
   );
 }
 
-function InternalPreview({ totals }: { totals: QuoteTotals }) {
+function InternalPreview({ totals }) {
   return (
     <View>
       <InfoRow label="Labour Cost" value={money(totals.labourCost)} />
@@ -413,31 +309,25 @@ function InternalPreview({ totals }: { totals: QuoteTotals }) {
   );
 }
 
-// ─── Tab Names ────────────────────────────────────────────────────────────────
-
-const TABS = ['Home', 'Quotes', 'Clients', 'Pricing', 'Reports', 'Settings'] as const;
-type TabName = typeof TABS[number];
-type QuoteViewMode = 'Client Quote' | 'Breakdown' | 'Internal';
-
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [tab, setTab] = useState<TabName>('Home');
-  const [pricingProfiles, setPricingProfiles] = useState<PricingProfile[]>(defaultPricingProfiles);
-  const [clients, setClients] = useState<Client[]>(defaultClients);
-  const [quotes, setQuotes] = useState<Quote[]>(defaultQuotes);
-  const [company, setCompany] = useState<Company>(companyDefaults);
-  const [selectedQuoteId, setSelectedQuoteId] = useState<string>(DEFAULT_QUOTE_ID);
-  const [selectedRoomId, setSelectedRoomId] = useState<string>(DEFAULT_ROOM_ID);
-  const [quoteViewMode, setQuoteViewMode] = useState<QuoteViewMode>('Client Quote');
+  const [tab, setTab] = useState('Home');
+  const [pricingProfiles, setPricingProfiles] = useState(defaultPricingProfiles);
+  const [clients, setClients] = useState(defaultClients);
+  const [quotes, setQuotes] = useState(defaultQuotes);
+  const [company, setCompany] = useState(companyDefaults);
+  const [selectedQuoteId, setSelectedQuoteId] = useState(DEFAULT_QUOTE_ID);
+  const [selectedRoomId, setSelectedRoomId] = useState(DEFAULT_ROOM_ID);
+  const [quoteViewMode, setQuoteViewMode] = useState('Client Quote');
 
-  const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) ?? quotes[0];
-  const selectedClient = clients.find((c) => c.id === selectedQuote?.clientId) ?? clients[0];
-  const selectedProfile = pricingProfiles.find((p) => p.id === selectedClient?.pricingProfileId) ?? pricingProfiles[0];
-  const selectedRoom = selectedQuote?.rooms.find((r) => r.id === selectedRoomId) ?? selectedQuote?.rooms[0];
+  const selectedQuote = quotes.find((q) => q.id === selectedQuoteId) || quotes[0];
+  const selectedClient = clients.find((c) => c.id === selectedQuote?.clientId) || clients[0];
+  const selectedProfile = pricingProfiles.find((p) => p.id === selectedClient?.pricingProfileId) || pricingProfiles[0];
+  const selectedRoom = selectedQuote?.rooms.find((r) => r.id === selectedRoomId) || selectedQuote?.rooms[0];
 
   const calcTotals = useCallback(
-    (quote: Quote) => calcTotalsForQuote(quote, clients, pricingProfiles),
+    (quote) => calcTotalsForQuote(quote, clients, pricingProfiles),
     [clients, pricingProfiles]
   );
 
@@ -464,11 +354,11 @@ export default function App() {
       };
     }), [clients, quotes, calcTotals]);
 
-  const updateQuote = (quoteId: string, updater: (q: Quote) => Quote) =>
+  const updateQuote = (quoteId, updater) =>
     setQuotes((prev) => prev.map((q) => (q.id === quoteId ? updater(q) : q)));
 
   const addClient = () => {
-    const client: Client = { id: uid(), clientName: `Client ${clients.length + 1}`, companyName: '', billingAddress: '', siteAddress: '', contactName: '', contactPhone: '', contactEmail: '', pricingProfileId: pricingProfiles[0]?.id, notes: '' };
+    const client = { id: uid(), clientName: `Client ${clients.length + 1}`, companyName: '', billingAddress: '', siteAddress: '', contactName: '', contactPhone: '', contactEmail: '', pricingProfileId: pricingProfiles[0]?.id, notes: '' };
     setClients((prev) => [client, ...prev]);
     Alert.alert('Client added');
   };
@@ -477,7 +367,7 @@ export default function App() {
     const clientId = clients[0]?.id;
     if (!clientId) return Alert.alert('Add a client first');
     const newRoomId = uid();
-    const quote: Quote = {
+    const quote = {
       id: uid(), quoteNumber: `${company.quotePrefix}-${company.nextQuoteNumber}`, clientId, status: 'Draft',
       title: `New Quote ${company.nextQuoteNumber}`, createdAt: new Date().toISOString().slice(0, 10),
       description: 'Description of works', exclusions: company.defaultExclusions,
@@ -492,57 +382,57 @@ export default function App() {
   };
 
   const addRoom = () => {
-    const room: Room = { id: uid(), name: `Room ${selectedQuote.rooms.length + 1}`, included: true, description: '', items: [] };
+    const room = { id: uid(), name: `Room ${selectedQuote.rooms.length + 1}`, included: true, description: '', items: [] };
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: [...q.rooms, room] }));
     setSelectedRoomId(room.id);
   };
 
-  const duplicateRoom = (roomId: string) => {
+  const duplicateRoom = (roomId) => {
     const room = selectedQuote.rooms.find((r) => r.id === roomId);
     if (!room) return;
-    const dup: Room = { ...JSON.parse(JSON.stringify(room)), id: uid(), name: `${room.name} Copy`, items: room.items.map((i) => ({ ...i, id: uid() })) };
+    const dup = { ...JSON.parse(JSON.stringify(room)), id: uid(), name: `${room.name} Copy`, items: room.items.map((i) => ({ ...i, id: uid() })) };
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: [...q.rooms, dup], activity: [...q.activity, { id: uid(), action: 'Room duplicated', date: new Date().toISOString().slice(0, 10), note: room.name }] }));
   };
 
-  const addItemToRoom = (category: string, itemName: string) => {
+  const addItemToRoom = (category, itemName) => {
     const source = selectedProfile.catalogue[category]?.find((i) => i.name === itemName);
     if (!source) return;
-    const item: QuoteItem = { id: uid(), included: true, category, name: source.name, quantity: 1, labour: source.labour, materials: source.materials, complexity: 'New Install', spec: 'Standard', notes: '' };
+    const item = { id: uid(), included: true, category, name: source.name, quantity: 1, labour: source.labour, materials: source.materials, complexity: 'New Install', spec: 'Standard', notes: '' };
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: q.rooms.map((r) => r.id === selectedRoomId ? { ...r, items: [...r.items, item] } : r) }));
   };
 
   const addCustomItemToRoom = () => {
-    const item: QuoteItem = { id: uid(), included: true, category: 'Other', name: 'Custom Item', quantity: 1, labour: 0, materials: 0, complexity: 'New Install', spec: 'Standard', notes: '' };
+    const item = { id: uid(), included: true, category: 'Other', name: 'Custom Item', quantity: 1, labour: 0, materials: 0, complexity: 'New Install', spec: 'Standard', notes: '' };
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: q.rooms.map((r) => r.id === selectedRoomId ? { ...r, items: [...r.items, item] } : r) }));
   };
 
-  const updateRoom = (roomId: string, patch: Partial<Room>) =>
+  const updateRoom = (roomId, patch) =>
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: q.rooms.map((r) => r.id === roomId ? { ...r, ...patch } : r) }));
 
-  const updateItem = (roomId: string, itemId: string, patch: Partial<QuoteItem>) =>
+  const updateItem = (roomId, itemId, patch) =>
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: q.rooms.map((r) => r.id === roomId ? { ...r, items: r.items.map((i) => i.id === itemId ? { ...i, ...patch } : i) } : r) }));
 
-  const removeItem = (roomId: string, itemId: string) =>
+  const removeItem = (roomId, itemId) =>
     updateQuote(selectedQuote.id, (q) => ({ ...q, rooms: q.rooms.map((r) => r.id === roomId ? { ...r, items: r.items.filter((i) => i.id !== itemId) } : r) }));
 
-  const createPricingItem = (category: string) => {
+  const createPricingItem = (category) => {
     const newItem = { id: uid(), name: `New ${category} Item`, labour: 0, materials: 0 };
     setPricingProfiles((prev) => prev.map((p) => p.id === selectedProfile.id ? { ...p, catalogue: { ...p.catalogue, [category]: [...p.catalogue[category], newItem] } } : p));
   };
 
-  const updateCatalogueItem = (profileId: string, category: string, itemId: string, patch: Partial<CatalogueItem>) =>
+  const updateCatalogueItem = (profileId, category, itemId, patch) =>
     setPricingProfiles((prev) => prev.map((p) => p.id === profileId ? { ...p, catalogue: { ...p.catalogue, [category]: p.catalogue[category].map((i) => i.id === itemId ? { ...i, ...patch } : i) } } : p));
 
   const addPricingProfile = () => {
-    const profile: PricingProfile = { id: uid(), name: `Profile ${pricingProfiles.length + 1}`, vatRate: 0.2, marginPct: 25, complexityMultipliers: { 'New Install': 1.0, Modification: 1.35 }, specMultipliers: { Standard: 1.0, Premium: 1.2 }, catalogue: JSON.parse(JSON.stringify(DEFAULT_ITEMS)) };
+    const profile = { id: uid(), name: `Profile ${pricingProfiles.length + 1}`, vatRate: 0.2, marginPct: 25, complexityMultipliers: { 'New Install': 1.0, Modification: 1.35 }, specMultipliers: { Standard: 1.0, Premium: 1.2 }, catalogue: JSON.parse(JSON.stringify(DEFAULT_ITEMS)) };
     setPricingProfiles((prev) => [profile, ...prev]);
   };
 
-  const setQuoteStatus = (status: QuoteStatus) =>
+  const setQuoteStatus = (status) =>
     updateQuote(selectedQuote.id, (q) => ({ ...q, status, activity: [...q.activity, { id: uid(), action: `Status set to ${status}`, date: new Date().toISOString().slice(0, 10), note: '' }] }));
 
   const duplicateQuote = () => {
-    const cloned: Quote = JSON.parse(JSON.stringify(selectedQuote));
+    const cloned = JSON.parse(JSON.stringify(selectedQuote));
     cloned.id = uid();
     cloned.quoteNumber = `${company.quotePrefix}-${company.nextQuoteNumber}`;
     cloned.title = `${selectedQuote.title} Copy`;
@@ -638,7 +528,7 @@ export default function App() {
             </Card>
 
             <Card title="Workflow Actions">
-              <ChipRow options={(['Draft', 'Sent', 'Accepted', 'Rejected', 'On Hold'] as QuoteStatus[]).map((s) => ({ key: s, label: s }))} selected={selectedQuote.status} onSelect={(v) => setQuoteStatus(v as QuoteStatus)} />
+              <ChipRow options={['Draft', 'Sent', 'Accepted', 'Rejected', 'On Hold'].map((s) => ({ key: s, label: s }))} selected={selectedQuote.status} onSelect={setQuoteStatus} />
               <Button text="Duplicate Quote" onPress={duplicateQuote} />
               <Button text="Revise Quote" onPress={reviseQuote} />
             </Card>
@@ -710,7 +600,7 @@ export default function App() {
             )}
 
             <Card title="Quote Preview">
-              <ChipRow options={[{ key: 'Client Quote', label: 'Client Quote' }, { key: 'Breakdown', label: 'Breakdown' }, { key: 'Internal', label: 'Internal' }]} selected={quoteViewMode} onSelect={(v) => setQuoteViewMode(v as QuoteViewMode)} />
+              <ChipRow options={[{ key: 'Client Quote', label: 'Client Quote' }, { key: 'Breakdown', label: 'Breakdown' }, { key: 'Internal', label: 'Internal' }]} selected={quoteViewMode} onSelect={setQuoteViewMode} />
               {quoteViewMode === 'Client Quote' && selectedTotals && <DocumentPreview company={company} quote={selectedQuote} client={selectedClient} totals={selectedTotals} />}
               {quoteViewMode === 'Breakdown' && selectedTotals && <BreakdownPreview quote={selectedQuote} totals={selectedTotals} profile={selectedProfile} />}
               {quoteViewMode === 'Internal' && selectedTotals && <InternalPreview totals={selectedTotals} />}
