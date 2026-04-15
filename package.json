@@ -1,4 +1,6 @@
 {
+  "name": "quote-builder-pro",
+  "version": "1.0.0",
   "license": "0BSD",
   "main": "index.ts",
   "scripts": {
@@ -15,7 +17,6 @@
     "@expo/vector-icons": "^15.0.3",
     "react-native-paper": "4.9.2"
   },
-  "private": true,
   "devDependencies": {
     "@types/react": "~19.1.10",
     "typescript": "~5.9.2"
